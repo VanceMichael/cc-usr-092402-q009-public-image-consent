@@ -1,6 +1,8 @@
 
 from flask import Flask, jsonify
 
+from .api import init_app
+
 
 def create_app() -> Flask:
     app = Flask(__name__)
@@ -9,6 +11,7 @@ def create_app() -> Flask:
     def health():
         return jsonify({"status": "ok"})
 
+    init_app(app)
     return app
 
 

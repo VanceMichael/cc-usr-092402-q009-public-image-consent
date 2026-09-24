@@ -1,5 +1,58 @@
 {
-  "work_ref": "WORK-DEMO",
-  "author_ref": "AUTHOR-DEMO",
-  "consent_ref": "CONSENT-DEMO"
+  "work": {
+    "work_ref": "WORK-DEMO",
+    "author_ref": "AUTHOR-DEMO",
+    "source_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "recorded_at": "2026-01-01T10:00:00+08:00"
+  },
+  "session": {
+    "session_ref": "SESSION-DEMO",
+    "work_ref": "WORK-DEMO",
+    "shot_at": "2026-01-01T10:00:00+08:00",
+    "locality": "CN-HZ"
+  },
+  "persons": [
+    {"person_ref": "PERSON-ADULT-DEMO", "is_minor": false},
+    {"person_ref": "PERSON-MINOR-DEMO", "is_minor": true},
+    {"person_ref": "GUARDIAN-DEMO", "is_minor": false}
+  ],
+  "claims": [
+    {"work_ref": "WORK-DEMO", "person_ref": "PERSON-ADULT-DEMO", "role": "audience", "bbox": [0.0, 0.0, 0.3, 0.5]},
+    {"work_ref": "WORK-DEMO", "person_ref": "PERSON-MINOR-DEMO", "role": "subject", "bbox": [0.35, 0.1, 0.65, 0.8]}
+  ],
+  "guardianship": {
+    "child_ref": "PERSON-MINOR-DEMO",
+    "guardian_ref": "GUARDIAN-DEMO",
+    "relation": "parent",
+    "evidence_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "valid_from": "2025-01-01T00:00:00+08:00"
+  },
+  "grant_adult": {
+    "person_ref": "PERSON-ADULT-DEMO",
+    "session_ref": "SESSION-DEMO",
+    "purposes": ["promotion"],
+    "channels": ["social_media"],
+    "regions": ["CN"],
+    "valid_from": "2026-01-01T00:00:00+08:00",
+    "valid_until": "2027-01-01T00:00:00+08:00",
+    "granted_by": "PERSON-ADULT-DEMO"
+  },
+  "grant_minor": {
+    "person_ref": "PERSON-MINOR-DEMO",
+    "session_ref": "SESSION-DEMO",
+    "purposes": ["promotion", "exhibition"],
+    "channels": ["*"],
+    "regions": ["*"],
+    "valid_from": "2026-01-01T00:00:00+08:00",
+    "valid_until": "2027-01-01T00:00:00+08:00",
+    "granted_by": "GUARDIAN-DEMO"
+  },
+  "versions": [
+    {"kind": "original", "work_ref": "WORK-DEMO", "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"},
+    {"kind": "crop", "parent_version_id": "由 original 返回", "spec": {"bbox": [0.0, 0.0, 0.7, 1.0]}},
+    {"kind": "mask", "parent_version_id": "由父版本返回", "spec": {"regions": [[0.0, 0.0, 0.34, 0.55]]}},
+    {"kind": "subtitle", "parent_version_id": "由父版本返回", "spec": {"mentions": ["PERSON-ADULT-DEMO"], "replacement_text": "感谢这位观众"}},
+    {"kind": "composite", "work_ref": "WORK-DEMO", "sources": [{"source_version_id": "来源版本", "placement": [0.0, 0.0, 1.0, 1.0]}]}
+  ],
+  "external_verify_example": "/verify?version_id=VER-...&purpose=promotion&channel=social_media&region=CN&as_of=2026-03-01T09:00:00%2B00:00"
 }

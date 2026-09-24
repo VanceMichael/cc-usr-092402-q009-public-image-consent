@@ -1,12 +1,68 @@
 {
-  "schema_version": "1",
-  "required_fields": [
-    "work_ref",
-    "author_ref",
-    "consent_ref",
-    "usage_scope",
-    "withdrawn_at"
-  ],
+  "schema_version": "2",
   "time_format": "ISO-8601 with offset",
-  "digest_format": "sha256:<hex>"
+  "digest_format": "sha256:<hex>",
+  "enums": {
+    "version_kind": ["original", "crop", "mask", "composite", "subtitle"],
+    "role": ["subject", "performer", "extra", "audience", "staff"],
+    "purpose": ["exhibition", "promotion", "archive", "documentation", "education"],
+    "channel": ["onsite", "social_media", "overseas_tour"],
+    "proposal_status": ["pending", "approved", "rejected"],
+    "publication_status": ["active", "frozen"],
+    "disposition_status": ["open", "done"],
+    "wildcard": "*"
+  },
+  "resources": {
+    "work": ["work_ref", "author_ref", "source_digest", "title", "recorded_at"],
+    "session": ["session_ref", "work_ref", "shot_at", "locality", "recorded_at"],
+    "person": ["person_ref", "is_minor", "label", "recorded_at"],
+    "person_claim": ["claim_id", "work_ref", "person_ref", "role", "bbox", "declared_by", "recorded_at"],
+    "guardianship": ["guardianship_id", "child_ref", "guardian_ref", "relation", "evidence_digest", "valid_from", "valid_to", "recorded_at"],
+    "grant": ["grant_id", "person_ref", "session_ref", "purposes", "channels", "regions", "valid_from", "valid_until", "granted_by", "recorded_at"],
+    "grant_revocation": ["revocation_id", "grant_id", "revoked_at", "reason", "recorded_at"],
+    "version": ["version_id", "work_ref", "parent_version_id", "kind", "spec", "digest", "created_by", "created_at"],
+    "version_source": ["version_id", "source_version_id", "placement"],
+    "version_presence": ["version_id", "person_ref", "present", "masked", "role", "bbox", "detail"],
+    "proposal": ["proposal_id", "version_id", "purpose", "channel", "region", "use_from", "use_until", "submitted_by", "created_at", "status"],
+    "proposal_revision": ["revision_id", "proposal_id", "editor_ref", "revised_at", "patch"],
+    "approval": ["approval_id", "proposal_id", "reviewer_ref", "decision", "comment", "decided_at", "conflict_check", "gate_snapshot"],
+    "publication": ["publication_id", "proposal_id", "version_id", "purpose", "channel", "region", "published_at", "status", "evidence", "evidence_digest", "frozen_at", "freeze_reason"],
+    "disposition_item": ["item_id", "publication_id", "channel", "action", "reason", "status", "created_at", "handled_at"]
+  },
+  "rules": [
+    "版本按派生类型继承并重新计算在场人物：crop 取裁剪框相交集并重映射坐标；mask 在覆盖人物框面积过半时置 masked；composite 取来源并集，同一人任一来源未遮蔽即可辨认；subtitle 具名提及使已遮蔽人物重新需要授权。",
+    "多人影像合并最严格条件：任一可辨认人物未获授权即整体无效；有效期取所有在场人物授权的最早到期。",
+    "未成年人授权必须由判定时点监护关系有效的监护人签署；成年人授权仅本人签署有效。",
+    "所有门控按 as-of 时点重算：recorded_at 晚于该时点的授权、监护与撤回不得参与；迟到授权不得倒改已发布的审批证据。",
+    "用途方案提交后只能在 pending 状态编辑且每次编辑留痕；批准必须由无利益关系审核人作出，且批准时门控必须通过。",
+    "撤回只冻结发布证据中实际依赖该授权且仍 active 的发布渠道，并为每个冻结发布生成处置清单。",
+    "GET /verify 对外仅返回版本对指定用途/渠道/地域/时点是否有效；内部证据接口可重放发布时的影像摘要、授权范围、遮蔽处理与批准链。"
+  ],
+  "endpoints": {
+    "ingest": [
+      "POST /admin/works",
+      "POST /admin/sessions",
+      "POST /admin/persons",
+      "POST /admin/claims",
+      "POST /admin/guardianships",
+      "POST /admin/grants"
+    ],
+    "versions": ["POST /admin/versions"],
+    "approval": [
+      "POST /admin/proposals",
+      "POST /admin/proposals/{id}/revisions",
+      "POST /admin/proposals/{id}/decisions",
+      "GET /admin/proposals/{id}/chain",
+      "POST /admin/publications"
+    ],
+    "revocation": [
+      "POST /admin/grants/{id}/revocations",
+      "GET /admin/dispositions",
+      "POST /admin/dispositions/{id}/handle"
+    ],
+    "verification": [
+      "GET /verify?version_id=&purpose=&channel=&region=&as_of=",
+      "GET /admin/publications/{id}/evidence"
+    ]
+  }
 }
