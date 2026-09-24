@@ -1,12 +1,69 @@
 {
-  "schema_version": "1",
-  "required_fields": [
-    "work_ref",
-    "author_ref",
-    "consent_ref",
-    "usage_scope",
-    "withdrawn_at"
-  ],
+  "schema_version": "2",
   "time_format": "ISO-8601 with offset",
-  "digest_format": "sha256:<hex>"
+  "digest_format": "sha256:<hex>",
+  "entities": {
+    "session": {
+      "required": ["session_ref", "shot_at"],
+      "optional": ["location_ref"]
+    },
+    "work": {
+      "required": ["work_ref", "session_ref", "author_ref", "digest", "captured_at"]
+    },
+    "person": {
+      "required": ["person_ref"],
+      "optional": ["kind", "is_minor", "guardian_ref"],
+      "kind_enum": ["visitor", "extra", "staff", "minor"],
+      "rule": "is_minor 或 kind=minor 必须提供 guardian_ref；未成年人授权只能由监护人授予"
+    },
+    "recognition": {
+      "required": ["recognition_ref", "work_ref", "person_ref", "declared_by"],
+      "optional": ["region"],
+      "region": {"x": "float 0..1", "y": "float 0..1", "w": "float 0..1", "h": "float 0..1"}
+    },
+    "grant": {
+      "required": ["grant_ref", "person_ref", "purposes", "territories", "valid_from"],
+      "optional": ["granted_by_ref", "valid_until", "created_at"],
+      "territory_all": "ALL 表示不限地域",
+      "rule": "created_at 为授权登记时点；缺省取服务器当前时间。迟到授权不会对历史发布生效"
+    },
+    "withdrawal": {
+      "required": ["withdrawal_ref", "grant_ref"],
+      "optional": ["withdrawn_at", "reason"]
+    },
+    "version": {
+      "required": ["version_ref", "work_ref", "kind", "digest"],
+      "optional": ["parent_version_ref", "params"],
+      "kind_enum": ["original", "crop", "mask", "composite", "subtitle"],
+      "rule": "非原始版本继承父版本（合成取多来源）的人物状态并重新计算；mask 后人物不再需要授权"
+    },
+    "plan": {
+      "required": ["plan_ref", "version_ref", "purpose", "channel", "territory", "submitted_by"],
+      "optional": ["interested_parties"],
+      "rule": "提交后 pending；须由非提交人且非 interested_parties 的审核人裁决"
+    },
+    "approval": {
+      "required": ["approval_ref", "plan_ref", "approver_ref", "decision"],
+      "decision_enum": ["approved", "rejected"]
+    },
+    "publication": {
+      "required": ["publication_ref", "plan_ref"],
+      "optional": ["published_at"],
+      "rule": "写入即不可变，固化影像摘要/授权范围/遮蔽处理/批准链；迟到授权与撤回均不改写"
+    }
+  },
+  "endpoints": {
+    "POST /v1/registry/{sessions|works|persons|recognitions|grants}": "登记业务事实",
+    "POST /v1/versions": "派生版本并重算人物可见状态",
+    "GET  /v1/versions/<version_ref>": "版本血缘与人物状态",
+    "POST /v1/plans": "编辑提交用途方案",
+    "POST /v1/plans/decide": "无利益关系审核人裁决",
+    "POST /v1/publications": "核验通过后生成不可变发布证据",
+    "POST /v1/withdrawals": "登记撤回，冻结受影响渠道并生成处置清单",
+    "GET  /v1/dispositions": "处置清单（可按 withdrawal_ref 过滤）",
+    "POST /v1/verify": "对外核验，仅返回 valid",
+    "POST /v1/internal/evaluate": "内部逐人裁决明细",
+    "GET  /v1/internal/publications/<publication_ref>": "内部重放发布时点证据"
+  },
+  "error_format": {"error": {"code": "string", "message": "string", "details": "object"}}
 }

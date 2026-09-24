@@ -1,5 +1,46 @@
 {
-  "work_ref": "WORK-DEMO",
-  "author_ref": "AUTHOR-DEMO",
-  "consent_ref": "CONSENT-DEMO"
+  "note": "本地样例，不含真实主体信息；展示合影中的监护人、未成年人、临时演员与观众",
+  "session": {
+    "session_ref": "SESSION-DEMO",
+    "shot_at": "2026-01-01T10:00:00+08:00",
+    "location_ref": "HALL-DEMO"
+  },
+  "work": {
+    "work_ref": "WORK-DEMO",
+    "session_ref": "SESSION-DEMO",
+    "author_ref": "AUTHOR-DEMO",
+    "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "captured_at": "2026-01-01T10:05:00+08:00"
+  },
+  "persons": [
+    {"person_ref": "PERSON-GUARDIAN-DEMO", "kind": "staff"},
+    {"person_ref": "PERSON-MINOR-DEMO", "kind": "minor", "guardian_ref": "PERSON-GUARDIAN-DEMO"},
+    {"person_ref": "PERSON-EXTRA-DEMO", "kind": "extra"},
+    {"person_ref": "PERSON-VISITOR-DEMO", "kind": "visitor"}
+  ],
+  "grants": [
+    {
+      "grant_ref": "GRANT-MINOR-DEMO",
+      "person_ref": "PERSON-MINOR-DEMO",
+      "granted_by_ref": "PERSON-GUARDIAN-DEMO",
+      "purposes": ["public_display"],
+      "territories": ["CN"],
+      "valid_from": "2026-01-02T00:00:00+08:00"
+    },
+    {
+      "grant_ref": "GRANT-EXTRA-DEMO",
+      "person_ref": "PERSON-EXTRA-DEMO",
+      "purposes": ["public_display"],
+      "territories": ["CN", "US"],
+      "valid_from": "2026-01-02T00:00:00+08:00"
+    }
+  ],
+  "derived_version_example": {
+    "version_ref": "VERSION-MASK-DEMO",
+    "work_ref": "WORK-DEMO",
+    "kind": "mask",
+    "parent_version_ref": "VERSION-ORIGINAL-DEMO",
+    "params": {"regions": [{"person_ref": "PERSON-MINOR-DEMO"}]},
+    "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+  }
 }
